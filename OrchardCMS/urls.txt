@@ -1,0 +1,44 @@
+Orchard TV:
+http://docs.orchardproject.net/Documentation/Orchard-TV
+http://app.pluralsight.com/courses/orchard-fundamentals
+https://www.udemy.com/orchard-cms-for-absolute-beginners/
+Orchard Doc:
+http://docs.orchardproject.net/
+中文文档: 
+http://orchardch.com/Document
+Orchard所用的技术:
+http://docs.orchardproject.net/Documentation/Orchard-dependencies-and-libraries
+Orchard tutorials:
+http://orchardbeginner.com/orchard-tutorials
+Orchard创建新的主题(Theme):
+http://www.orchardch.com/Blog/20120510041033
+<Orchard CMS: Up and Running>Book: http://shop.oreilly.com/product/0636920023999.do
+Orchard Express v1.7.2 精简版: http://www.cnblogs.com/zhongzf/p/3483114.html
+ORCHARD中文文档（翻译）: http://www.cnblogs.com/souther/p/4517348.html
+随笔分类 - Fluent NHibernate: http://www.cnblogs.com/inday/category/203168.html
+
+Chrome extension API:
+https://developer.chrome.com/extensions/api_other
+
+Siemens office:
+http://shop.siemens-home.cn/productlistcn/b-products/bgoodscooling/bgoodscoolingfridgefreezers/KK27F77TI-B?search=KK27F77TI-B
+
+IIS express command:
+http://www.iis.net/learn/extensions/using-iis-express/running-iis-express-from-the-command-line
+
+ASP.NET Identity:
+http://www.asp.net/identity/overview/getting-started/introduction-to-aspnet-identity
+
+IT Books:
+http://it-ebooks.info/tag/programming/
+
+WebMatrix3: https://www.microsoft.com/web/webmatrix/
+Autofac github: https://github.com/autofac/Autofac
+Autofac document: http://autofac.readthedocs.org/en/latest/
+Autofac API: http://autofac.org/apidoc/
+
+
+git doc
+http://git-scm.com/docs
+git chinese doc
+http://www.ihref.com/read-16369.html
