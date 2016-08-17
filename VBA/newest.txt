@@ -1,0 +1,107 @@
+Sub ChangePrice()
+
+
+Dim vColumn As String
+Dim cColumn As String
+vColumn = "H"
+cColumn = "I"
+cColumn = vColumn
+
+Dim pColum As String
+Dim aColum As String
+
+
+pColumn = "AM"
+aColumn = "AO"
+aColumn = pColumn
+
+
+Dim istart As Integer
+Dim iend As Integer
+
+istart = 2
+iend = 108
+
+
+For a_counter = istart To iend
+
+    Dim pPrice As String
+    Dim aPrice As String
+   
+    pPrice = Range(vColumn & a_counter).value
+    pPrice = GetInterger(pPrice)
+    Dim length As Integer
+    length = Len(pPrice)
+    pPrice = pPrice * 0.8
+    pPrice = GetInterger(pPrice)
+   
+    If pPrice < 100 Then
+    pPrice = pPrice + 10
+    ElseIf pPrice < 500 Then
+    pPrice = pPrice + 20
+    ElseIf pPrice < 1000 Then
+    pPrice = pPrice + 30
+    ElseIf pPrice < 1500 Then
+    pPrice = pPrice + 50
+    ElseIf pPrice < 2000 Then
+    pPrice = pPrice + 100
+    Else
+    pPrice = pPrice + 200
+    End If
+
+    Range(cColumn & a_counter).value = pPrice
+   
+
+    'Worksheets("Sheet1").Range("B" & a_counter).Value = Worksheets("Sheet1").Range("A" & a_counter).Value
+    Dim pValue As String
+    pValue = Range(pColumn & a_counter).value
+    'MsgBox "whole string is " + pValue
+   
+    Dim indexPosition As String
+    indexPosition = InStr(pValue, ".")
+    'MsgBox "index is " + indexPosition
+   
+   
+    If indexPosition = "" Or indexPosition = "0" Then
+    'MsgBox "no index"
+    Else
+    'MsgBox "contain index"
+   
+        Dim midd As String
+        midd = Mid(pValue, indexPosition, 3)
+        'MsgBox "middle string is " + midd
+        Dim afterstr As String
+        afterstr = Replace(pValue, midd, ".00")
+        'MsgBox "after trim is" + afterstr
+        'midd = Mid(pValue, indexPosition - length, indexPosition)
+        midd = Left(afterstr, indexPosition)
+       
+        'MsgBox midd
+        afterstr = Replace(afterstr, midd, pPrice + ".")
+        'MsgBox afterstr
+       
+       
+        Range(aColumn & a_counter).value = afterstr
+   
+    End If
+   
+Next a_counter
+
+
+End Sub
+
+Function GetInterger(value)
+
+Dim i As String
+Dim iValue As String
+i = InStr(value, ".")
+If i = "" Or i = "0" Then
+
+    GetInterger = value
+Else
+   GetInterger = Left(value, i - 1)
+      
+End If
+
+End Function
+

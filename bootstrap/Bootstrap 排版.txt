@@ -1,0 +1,66 @@
+<h1>,<h2>,<h3>,<h4>,<h5>,<h6>
+<small>
+<p class="lead"></p>
+<small>
+<strong>
+<em>
+<p class="text-left"></p>
+<p class="text-center"></p>
+<p class="text-right"></p>
+<p class="text-muted"></p>
+<p class="text-primary"></p>
+<p class="text-success"></p>
+<p class="text-info"></p>
+<p class="text-warning"></p>
+<p class="text-danger"></p>
+
+<abbr title="World Wide Web">WWW</abbr>
+<abbr title="Real Simple Syndication" class="initialism">RSS</abbr>
+
+<address>
+<strong>Some Company, Inc.</strong><br>
+007 street<br>
+Some City, State XXXX<br>
+<abbr title="Phone">P:</abbr> (123) 456-7890
+</address>
+
+<address>
+<strong>Full Name</strong><br>
+<a href="mailto:#">mailto@somedomain.com</a>
+</address>
+
+<blockquote>
+Thi is title.
+<small>Someone famous in 
+<cite title="SourceTitle"></cite>
+</small>
+</blockquote>
+
+<blockquote class="pull-right"></blockquote>
+
+<ol><li></li></ol>
+<ul><li></li></ul>
+<ul class="list-inline"><li></li></ul>
+<dl><dt></dt><dd></dd></dl>
+
+<dl class="dl-horizontal">
+<dt></dt>
+<dd></dd>
+</dl>
+
+.lead
+.small
+.text-left
+.text-center
+.text-right
+.text-justify
+.text-nowrap
+.text-lowercase
+.text-uppercase
+.text-capitalize
+.initialism
+.blockquote-reverse
+.list-unstyled
+.list-inline
+.dl-horizontal
+.pre-scrollable

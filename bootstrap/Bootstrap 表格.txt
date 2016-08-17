@@ -1,0 +1,12 @@
+.table
+.table-striped
+.table-bordered
+.table-hover
+.table-condensed
+
+<tr>,<th>,<td>
+.active
+.success
+.info
+.warning
+.danger

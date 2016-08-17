@@ -1,0 +1,20 @@
+<Lists>
+	<List name="SoW">
+		<Field display="" internal="Title"/>
+		<Field display="" internal="SOW #"/>
+		<Field display="" internal="SoW Type"/>
+		<Field display="" internal="Location"/>
+		<Field display="" internal="Reviewed By"/>
+		<Field display="" internal="Approved By"/>
+		<Field display="" internal="Is Extension SoW?"/>
+		<Field display="" internal="SoW Status"/>
+		<Field display="" internal="Proposal Name"/>
+		<Field display="" internal="Support Level"/>
+		<Field display="" internal="Track"/>
+		<Field display="" internal="Proposal Name:Start Date"/>
+		<Field display="" internal="Proposal Name:End Date"/>
+		<Field display="" internal="Proposal Name:Estimation Anchor"/>
+		<Field display="" internal="Proposal Name:Estimated Cost"/>
+		<Field display="" internal="Project_x003a_Title"/>
+	</List>
+</Lists>
