@@ -1,0 +1,371 @@
+Public sheet As Worksheet
+Public sourceCol As String
+Public hotelidCol As String
+Public sqlCol As String
+Public hotelNameCol As String
+Public hotelAddressCol As String
+Public latitudeCol As String
+Public longitudeCol As String
+Public latDeltaCol As String
+Public lngDeltaCol As String
+Public startRow As Integer
+Public endRow As Long
+Public searchType As Integer
+Public countryCode As String
+
+
+Sub Main()
+    Set sheet = ThisWorkbook.Sheets("Sheet5")
+    startRow = 2
+    endRow = sheet.Range("A1048576").End(xlUp).Row
+    searchType = 1
+    '1: search hotel name
+    '2: search hotel address
+    
+    sourceCol = "E"
+    hotelidCol = "F"
+    sqlCol = "D"
+    hotelNameCol = "C"
+    hotelAddressCol = "B"
+    latitudeCol = "G"
+    longitudeCol = "H"
+    latDeltaCol = "I"
+    lngDeltaCol = "J"
+    countryCode = "'ad'"
+    
+    MsgBox GetDistance(30.178709, 120.194607, 30.09719, 120.196475) * 1000
+    
+    'Call ReplaceSpecialCol(hotelNameCol, "[\-]+", " ")
+    'Call ReplaceSpecialCol(hotelAddressCol, "[\-]+", " ")
+    'Call ReplaceSpecialCol(hotelAddressCol, "^[\.]+", "")
+    
+    'Call JapanBookingAddress
+    'Call JapanTravelAddress
+    
+    'Call CompareUpDown("A")
+    'Call CompareUpDown("B")
+    'Call CompareUpDown("C")
+    'Call CompareUpDown("D")
+    
+    'Call CompareLeftRight("A", "B")
+    'Call CompareLeftRight("C", "D")
+    
+    'Call Mapping
+    'Call FlagBelowSQL("D")
+    
+    'Call MarkContinueSQL("D")
+    
+    
+
+End Sub
+
+Sub ReplaceSpecialCol(Col, Pattern, RepStr)
+
+    Dim regEx As New RegExp
+
+    With regEx
+        .Global = True
+        .MultiLine = True
+        .IgnoreCase = True
+        .Pattern = Pattern
+    End With
+
+    For Index = startRow To endRow
+        value = sheet.Range(Col & Index).value
+    
+        If Pattern <> "" Then
+            If regEx.Test(value) Then
+                sheet.Range(Col & Index).value = regEx.Replace(value, RepStr)
+            End If
+        End If
+    Next Index
+
+End Sub
+
+Function ReplaceSpecialStr(InputStr, Pattern, RepStr)
+    Dim regEx As New RegExp
+    With regEx
+        .Global = True
+        .MultiLine = True
+        .IgnoreCase = True
+        .Pattern = Pattern
+    End With
+    
+    If regEx.Test(InputStr) Then
+        ReplaceSpecialStr = regEx.Replace(InputStr, RepStr)
+    Else
+        ReplaceSpecialStr = InputStr
+    End If
+End Function
+
+
+
+
+Sub JapanBookingAddress()
+    For Index = startRow To endRow
+        If sheet.Range(sourceCol & Index).value = "booking" Then
+            sheet.Range(hotelAddressCol & Index).value = SplitAddress(sheet.Range(hotelAddressCol & Index).value, ",", 2)
+        End If
+    Next Index
+End Sub
+
+Sub JapanTravelAddress()
+    For Index = startRow To endRow
+        If sheet.Range(sourceCol & Index).value = "travel" Then
+            sheet.Range(hotelAddressCol & Index).value = InvertStr(sheet.Range(hotelAddressCol & Index).value)
+        End If
+    Next Index
+
+End Sub
+
+
+Function InvertStr(InputStr)
+    InputStr = ReplaceSpecialStr(InputStr, "[\s]+", " ")
+    Dim SplitArray() As String
+    SplitArray = Split(InputStr, " ")
+    Dim tranStr As String
+    For Index = 0 To UBound(SplitArray, 1)
+        tranStr = tranStr + SplitArray(UBound(SplitArray, 1) - Index)
+        tranStr = tranStr + " "
+    Next Index
+    If tranStr = "" Then
+        InvertStr = InputStr
+    Else
+        InvertStr = tranStr
+    End If
+    
+End Function
+
+Function GetPi()
+    GetPi = 4 * Math.Atn(1)
+End Function
+
+Function Rad(value)
+    Rad = value * GetPi / 180
+End Function
+
+
+Function GetDistance(lat1, lng1, lat2, lng2)
+    RadLat1 = Rad(lat1)
+    RadLat2 = Rad(lat2)
+    LatRadDelta = RadLat1 - RadLat2
+    LngRadDelta = Rad(lng1) - Rad(lng2)
+    Calculator = 2 * Application.WorksheetFunction.Asin(Math.Sqr(Application.WorksheetFunction.Power(Math.Sin(LatRadDelta / 2), 2) + Math.Cos(RadLat1) * Math.Cos(RadLat2) * Application.WorksheetFunction.Power(Math.Sin(LngRadDelta / 2), 2)))
+    Calculator = Calculator * 6378.137
+    Calculator = Math.Round(Calculator * 10000) / 10000
+    GetDistance = Calculator
+End Function
+
+Function SplitAddress(InputStr, Delimiter, Index)
+    Dim SplitArray() As String
+    SplitArray() = Split(InputStr, Delimiter)
+    SplitAddress = SplitArray(Index)
+End Function
+
+Sub CompareUpDown(Col)
+    For Index = startRow To endRow - 1
+        If sheet.Range(Col & Index).value = sheet.Range(Col & Index + 1).value Then
+            sheet.Range(Col & Index).Interior.Color = RGB(0, 255, 0)
+            sheet.Range(Col & Index + 1).Interior.Color = RGB(0, 255, 0)
+        End If
+    Next Index
+End Sub
+
+Sub MarkContinueSQL(Col)
+    For Index = startRow To endRow - 1
+        If UCase(Left(sheet.Range(Col & Index).value, 6)) = "INSERT" And UCase(Left(sheet.Range(Col & Index + 1).value, 6)) = "INSERT" Then
+            sheet.Range(Col & Index).Interior.Color = RGB(0, 255, 0)
+            sheet.Range(Col & Index + 1).Interior.Color = RGB(0, 255, 0)
+        End If
+    Next Index
+End Sub
+
+Sub CompareLeftRight(LCol, RCol)
+    For Index = startRow To endRow
+        If UCase(Left(sheet.Range(LCol & Index).value, 5)) <> UCase(Left(sheet.Range(RCol & Index).value, 5)) Then
+            sheet.Range(LCol & Index).Font.Bold = True
+            sheet.Range(RCol & Index).Font.Bold = True
+        End If
+    Next Index
+End Sub
+
+Sub Mapping()
+
+For Index = startRow To endRow - 1
+    If (Index Mod 2 = 0) Then
+        sheet.Range(a & Index & ":" & J & Index).Interior.Color = RGB(203, 242, 232)
+    Else
+        sheet.Range(a & Index & ":" & J & Index).Interior.Color = RGB(245, 211, 236)
+    End If
+
+
+    Dim up As String
+    Dim down As String
+    up = sheet.Range(sourceCol & Index).value
+    down = sheet.Range(sourceCol & Index + 1).value
+    Dim bookingHotelId As String
+    Dim travelHotelId As String
+    Dim bookingHotelName As String
+    Dim travelHotelName As String
+    Dim bookingHotelAddress As String
+    Dim travelHotelAddress As String
+    Dim bookingLat As Double
+    Dim bookingLng As Double
+    Dim travelLat As Double
+    Dim travelLng As Double
+        
+    
+    If (up <> down) Then
+        If (up = "booking") Then
+            bookingHotelId = sheet.Range(hotelidCol & Index).value
+            bookingHotelName = sheet.Range(hotelNameCol & Index).value
+            bookingHotelAddress = sheet.Range(hotelAddressCol & Index).value
+            bookingLat = sheet.Range(latitudeCol & Index).value
+            bookingLng = sheet.Range(longitudeCol & Index).value
+        Else
+            travelHotelId = sheet.Range(hotelidCol & Index).value
+            travelHotelName = sheet.Range(hotelNameCol & Index).value
+            travelHotelAddress = sheet.Range(hotelAddressCol & Index).value
+            travelLat = sheet.Range(latitudeCol & Index).value
+            travelLng = sheet.Range(longitudeCol & Index).value
+        End If
+        
+        If (down = "booking") Then
+            bookingHotelId = sheet.Range(hotelidCol & Index + 1).value
+            bookingHotelName = sheet.Range(hotelNameCol & Index + 1).value
+            bookingHotelAddress = sheet.Range(hotelAddressCol & Index + 1).value
+            bookingLat = sheet.Range(latitudeCol & Index + 1).value
+            bookingLng = sheet.Range(longitudeCol & Index + 1).value
+        Else
+            travelHotelId = sheet.Range(hotelidCol & Index + 1).value
+            travelHotelName = sheet.Range(hotelNameCol & Index + 1).value
+            travelHotelAddress = sheet.Range(hotelAddressCol & Index + 1).value
+            travelLat = sheet.Range(latitudeCol & Index + 1).value
+            travelLng = sheet.Range(longitudeCol & Index + 1).value
+            
+        End If
+        
+
+        If (searchType = 1) Then
+            If UCase(Left(travelHotelName, 5)) = UCase(Left(bookingHotelName, 5)) Then
+                
+                Call MarkLatLng(latDeltaCol, Index, bookingLat, travelLat)
+                Call MarkLatLng(lngDeltaCol, Index, bookingLng, travelLng)
+                If Abs(bookingLat - travelLat) < 0.01 And Abs(bookingLng - travelLng) < 0.01 Then
+                    Call MarkMappingCell(sourceCol, Index)
+                    Call GenerateSql(sqlCol, Index, bookingHotelId, travelHotelId)
+                End If
+                
+            End If
+        End If
+        
+        
+        
+        If (searchType = 2) Then
+            If UCase(Left(travelHotelAddress, 5)) = UCase(Left(bookingHotelAddress, 5)) Then
+                Call MarkLatLng(latDeltaCol, Index, bookingLat, travelLat)
+                Call MarkLatLng(lngDeltaCol, Index, bookingLng, travelLng)
+                sheet.Range(sourceCol & Index).Interior.Color = RGB(255, 0, 0)
+                If Abs(bookingLat - travelLat) < 0.001 And Abs(bookingLng - travelLng) < 0.001 Then
+                    Call MarkMappingCell(sourceCol, Index)
+                    Call GenerateSql(sqlCol, Index, bookingHotelId, travelHotelId)
+                End If
+            End If
+        End If
+       
+    End If
+
+Next Index
+
+End Sub
+
+Sub MarkLatLng(Col, Index, Value1, Value2)
+    sheet.Range(Col & Index).value = Abs(Value1 - Value2)
+    If Abs(Value1 - Value2) > 0.1 Then
+        sheet.Range(Col & Index).Interior.Color = RGB(255, 0, 0)
+    End If
+End Sub
+
+Sub MarkMappingCell(sourceCol, Index)
+    sheet.Range(sourceCol & Index).Interior.Color = RGB(255, 0, 0)
+End Sub
+
+Sub FlagBelowSQL(Col)
+    For Index = startRow To endRow - 1
+        If sheet.Range(Col & Index).value <> "" And sheet.Range(Col & Index) <> "flag" And sheet.Range(Col & Index + 1).value = "" Then
+            sheet.Range(Col & Index + 1).value = "flag"
+        End If
+    Next Index
+End Sub
+
+Sub SearchHotelName()
+
+Dim sheet As Worksheet
+Set sheet = ThisWorkbook.Sheets("Sheet1")
+
+Dim sourceCol As String
+sourceCol = "D"
+Dim hotelidCol As String
+hotelidCol = "E"
+Dim sqlCol As String
+sqlCol = "H"
+Dim hotelNameCol As String
+hotelNameCol = "C"
+
+Dim startRow As Integer
+Dim endRow As Long
+startRow = 2
+endRow = sheet.Range("A1048576").End(xlUp).Row
+
+
+For Index = startRow To endRow - 1
+    Dim up As String
+    Dim down As String
+    up = sheet.Range(sourceCol & Index).value
+    down = sheet.Range(sourceCol & Index + 1).value
+    Dim bookingHotelId As String
+    Dim travelHotelId As String
+    Dim bookingHotelName As String
+    Dim travelHotelName As String
+    
+    If (up = down) Then
+        'MsgBox up + " Equal " + down
+        
+    Else
+        If (up = "booking") Then
+            bookingHotelId = sheet.Range(hotelidCol & Index).value
+            bookingHotelName = sheet.Range(hotelNameCol & Index).value
+        Else
+            travelHotelId = sheet.Range(hotelidCol & Index).value
+            travelHotelName = sheet.Range(hotelNameCol & Index).value
+        End If
+        
+        If (down = "booking") Then
+            bookingHotelId = sheet.Range(hotelidCol & Index + 1).value
+            bookingHotelName = sheet.Range(hotelNameCol & Index + 1).value
+        Else
+            travelHotelId = sheet.Range(hotelidCol & Index + 1).value
+            travelHotelName = sheet.Range(hotelNameCol & Index + 1).value
+        End If
+        
+        If UCase(Left(travelHotelName, 5)) = UCase(Left(bookingHotelName, 5)) Then
+            sheet.Range(sourceCol & Index).Interior.Color = RGB(255, 0, 0)
+            'sheet.Range(sourceCol & Index + 1).Interior.Color = RGB(255, 0, 0)
+            sheet.Range(sqlCol & Index).value = GenerateSql(bookingHotelId, travelHotelId)
+            
+        End If
+        
+       
+    End If
+
+Next Index
+
+End Sub
+
+
+Sub GenerateSql(sqlCol, Index, bookingHotelId, travelHotelId)
+
+sheet.Range(sqlCol & Index).value = "insert [dbo].[Mappping_Hotel] (BookingHotelId, TravelHotelId, CountryCode) Values (" + bookingHotelId + "," + travelHotelId + "," + countryCode + ");"
+
+End Sub
+
