@@ -12,16 +12,21 @@ Public startRow As Integer
 Public endRow As Long
 Public searchType As Integer
 Public countryCode As String
+Public DistanceCol As String
+Public colorInter As Long
 
 
 Sub Main()
-    Set sheet = ThisWorkbook.Sheets("Sheet5")
+    Set sheet = ThisWorkbook.Sheets("MappingFilter")
     startRow = 2
     endRow = sheet.Range("A1048576").End(xlUp).Row
-    searchType = 1
+    
+    searchType = 2
+    countryCode = "'tw'"
     '1: search hotel name
     '2: search hotel address
-    
+   
+    colorInter = 1
     sourceCol = "E"
     hotelidCol = "F"
     sqlCol = "D"
@@ -31,10 +36,11 @@ Sub Main()
     longitudeCol = "H"
     latDeltaCol = "I"
     lngDeltaCol = "J"
-    countryCode = "'ad'"
+    DistanceCol = "K"
     
-    MsgBox GetDistance(30.178709, 120.194607, 30.09719, 120.196475) * 1000
+    'Call ColorLines
     
+
     'Call ReplaceSpecialCol(hotelNameCol, "[\-]+", " ")
     'Call ReplaceSpecialCol(hotelAddressCol, "[\-]+", " ")
     'Call ReplaceSpecialCol(hotelAddressCol, "^[\.]+", "")
@@ -51,13 +57,82 @@ Sub Main()
     'Call CompareLeftRight("C", "D")
     
     'Call Mapping
+    'Call NullBelowDistance("K")
     'Call FlagBelowSQL("D")
-    
     'Call MarkContinueSQL("D")
     
+    'Call Duplicate("A")
+    'Call Duplicate("B")
+    'Call Duplicate("C")
     
-
+    'Call DuplicateWithBold("B")
+    
+    'Call DSDistance
+   
+    
+    'Call SearchByDistance(47.568616, 10.70003, 50000)
+    
+    'Call DuplicateGroupColor("B")
+    'Call CalDistance("K", "L", "M", "N", "O")
+    
+    'Call CalDistance("I", "J", "K", "L", "M")
+    
+    Call MappingFilter("D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N")
+    
+    
+    
+ 
 End Sub
+
+Sub MappingFilter(TravolHotelNameCol, BookingHotelNameCol, TravolAddressCol, ZipCodeCol, BookingAddressCol, TLatCol, TLngCol, BLatCol, BLngCol, DistanceCol, MatchCol)
+    For Index = startRow To endRow
+        travolHotelName = sheet.Range(TravolHotelNameCol & Index).value
+        travolHotelName = FormatValue(travolHotelName)
+        
+        bookingHotelName = sheet.Range(BookingHotelNameCol & Index).value
+        bookingHotelName = FormatValue(bookingHotelName)
+        
+        travolAddress = sheet.Range(TravolAddressCol & Index).value
+        travolAddress = FormatValue(travolAddress)
+        
+        zipCode = sheet.Range(ZipCodeCol & Index).value
+        zipCode = FormatValue(zipCode)
+        
+        bookingAddress = sheet.Range(BookingAddressCol & Index).value
+        bookingAddress = FormatValue(bookingAddress)
+        
+        deltaDistance = sheet.Range(DistanceCol & Index).value
+        
+        If travolHotelName = bookingHotelName And InStr(bookingAddress, travolAddress) > 0 And InStr(bookingAddress, zipCode) > 0 Then
+            If deltaDistance <> "" And deltaDistance >= 0 And Distance < 50 Then
+                sheet.Range(MatchCol & Index).value = 1
+            End If
+            If deltaDistance >= 50 And deltaDistance < 100 Then
+                sheet.Range(MatchCol & Index).value = 2
+            End If
+            If deltaDistance >= 100 And deltaDistance < 200 Then
+                sheet.Range(MatchCol & Index).value = 3
+            End If
+        End If
+        
+        If sheet.Range(MatchCol & Index).value = "" Then
+            If deltaDistance <> "" And deltaDistance < 10 Then
+                sheet.Range(MatchCol & Index).value = 4
+            End If
+            If deltaDistance >= 10 And deltaDistance < 50 Then
+                sheet.Range(MatchCol & Index).value = 5
+            End If
+            If deltaDistance >= 50 And deltaDistance < 100 Then
+                sheet.Range(MatchCol & Index).value = 6
+            End If
+            If deltaDistance >= 100 And deltaDistance < 200 Then
+                sheet.Range(MatchCol & Index).value = 7
+            End If
+        End If
+    Next Index
+End Sub
+
+
 
 Sub ReplaceSpecialCol(Col, Pattern, RepStr)
 
@@ -81,6 +156,12 @@ Sub ReplaceSpecialCol(Col, Pattern, RepStr)
     Next Index
 
 End Sub
+
+Function FormatValue(value)
+    value = ReplaceSpecialStr(value, "/", " ")
+    value = ReplaceSpecialStr(value, "-", " ")
+    FormatValue = UCase(value)
+End Function
 
 Function ReplaceSpecialStr(InputStr, Pattern, RepStr)
     Dim regEx As New RegExp
@@ -145,15 +226,25 @@ Function Rad(value)
 End Function
 
 
-Function GetDistance(lat1, lng1, lat2, lng2)
-    RadLat1 = Rad(lat1)
-    RadLat2 = Rad(lat2)
+Function GetDistance(Lat1, Lng1, Lat2, Lng2)
+    RadLat1 = Rad(Lat1)
+    RadLat2 = Rad(Lat2)
     LatRadDelta = RadLat1 - RadLat2
-    LngRadDelta = Rad(lng1) - Rad(lng2)
+    LngRadDelta = Rad(Lng1) - Rad(Lng2)
     Calculator = 2 * Application.WorksheetFunction.Asin(Math.Sqr(Application.WorksheetFunction.Power(Math.Sin(LatRadDelta / 2), 2) + Math.Cos(RadLat1) * Math.Cos(RadLat2) * Application.WorksheetFunction.Power(Math.Sin(LngRadDelta / 2), 2)))
     Calculator = Calculator * 6378.137
     Calculator = Math.Round(Calculator * 10000) / 10000
     GetDistance = Calculator
+End Function
+
+Function SearchByDistance(LatCenter, LngCenter, Distance)
+    For Index = startRow To endRow
+        Lat = sheet.Range("D" & Index).value
+        Lng = sheet.Range("E" & Index).value
+        If GetDistance(LatCenter, LngCenter, Lat, Lng) * 1000 < Distance Then
+            sheet.Range("A" & Index).Interior.Color = RGB(0, 255, 0)
+        End If
+    Next Index
 End Function
 
 Function SplitAddress(InputStr, Delimiter, Index)
@@ -189,13 +280,42 @@ Sub CompareLeftRight(LCol, RCol)
     Next Index
 End Sub
 
+Sub Duplicate(Col)
+    For Index = startRow To endRow - 1
+        If (sheet.Range(Col & Index).value = sheet.Range(Col & Index + 1).value) Then
+            sheet.Range(Col & Index).Interior.Color = RGB(255, 0, 0)
+            sheet.Range(Col & Index + 1).Interior.Color = RGB(255, 0, 0)
+        End If
+    Next Index
+End Sub
+
+Sub DuplicateWithBold(Col)
+    For Index = startRow To endRow - 1
+        If (sheet.Range(Col & Index).value = sheet.Range(Col & Index + 1).value) Then
+            sheet.Range(Col & Index).Font.Bold = True
+            sheet.Range(Col & Index + 1).Font.Bold = True
+        End If
+    Next Index
+End Sub
+
+
+Sub ColorLines()
+    For Index = startRow To endRow
+        If (Index Mod 2 = 0) Then
+            sheet.Range(A & Index & ":" & J & Index).Interior.Color = RGB(203, 242, 232)
+        Else
+            sheet.Range(A & Index & ":" & J & Index).Interior.Color = RGB(245, 211, 236)
+        End If
+    Next Index
+End Sub
+
 Sub Mapping()
 
 For Index = startRow To endRow - 1
     If (Index Mod 2 = 0) Then
-        sheet.Range(a & Index & ":" & J & Index).Interior.Color = RGB(203, 242, 232)
+        sheet.Range(A & Index & ":" & J & Index).Interior.Color = RGB(203, 242, 232)
     Else
-        sheet.Range(a & Index & ":" & J & Index).Interior.Color = RGB(245, 211, 236)
+        sheet.Range(A & Index & ":" & J & Index).Interior.Color = RGB(245, 211, 236)
     End If
 
 
@@ -244,7 +364,6 @@ For Index = startRow To endRow - 1
             travelLng = sheet.Range(longitudeCol & Index + 1).value
             
         End If
-        
 
         If (searchType = 1) Then
             If UCase(Left(travelHotelName, 5)) = UCase(Left(bookingHotelName, 5)) Then
@@ -252,6 +371,9 @@ For Index = startRow To endRow - 1
                 Call MarkLatLng(latDeltaCol, Index, bookingLat, travelLat)
                 Call MarkLatLng(lngDeltaCol, Index, bookingLng, travelLng)
                 If Abs(bookingLat - travelLat) < 0.01 And Abs(bookingLng - travelLng) < 0.01 Then
+                    'distance = GetDistance(bookingLat, bookingLng, travelLat, travelLng)
+                    'sheet.Range(distanceCol & Index).value = GetDistance(bookingLat, bookingLng, travelLat, travelLng) * 1000
+                    Call MarkDistance(Index, bookingLat, bookingLng, travelLat, travelLng)
                     Call MarkMappingCell(sourceCol, Index)
                     Call GenerateSql(sqlCol, Index, bookingHotelId, travelHotelId)
                 End If
@@ -267,6 +389,9 @@ For Index = startRow To endRow - 1
                 Call MarkLatLng(lngDeltaCol, Index, bookingLng, travelLng)
                 sheet.Range(sourceCol & Index).Interior.Color = RGB(255, 0, 0)
                 If Abs(bookingLat - travelLat) < 0.001 And Abs(bookingLng - travelLng) < 0.001 Then
+                    'distance = GetDistance(bookingLat, bookingLng, travelLat, travelLng)
+                    'sheet.Range(distanceCol & Index).value = GetDistance(bookingLat, bookingLng, travelLat, travelLng) * 1000
+                    Call MarkDistance(Index, bookingLat, bookingLng, travelLat, travelLng)
                     Call MarkMappingCell(sourceCol, Index)
                     Call GenerateSql(sqlCol, Index, bookingHotelId, travelHotelId)
                 End If
@@ -278,6 +403,58 @@ For Index = startRow To endRow - 1
 Next Index
 
 End Sub
+
+Sub DSDistance()
+    For Index = startRow To endRow
+        If (sheet.Range("H" & Index).value <> "NULL" And sheet.Range("I" & Index).value <> "NULL" And sheet.Range("J" & Index).value <> "NULL" And sheet.Range("K" & Index) <> "NULL") Then
+            sheet.Range("G" & Index).value = GetDistance(sheet.Range("H" & Index).value, sheet.Range("I" & Index), sheet.Range("J" & Index), sheet.Range("K" & Index))
+        End If
+    Next Index
+End Sub
+
+Sub CalDistance(Lat1Col, Lng1Col, Lat2Col, Lng2Col, DisCol)
+    For Index = startRow To endRow
+        If (sheet.Range(Lat1Col & Index).value <> "NULL" And sheet.Range(Lng1Col & Index).value <> "NULL" And sheet.Range(Lat2Col & Index).value <> "NULL" And sheet.Range(Lng2Col & Index) <> "NULL") Then
+            sheet.Range(DisCol & Index).value = GetDistance(sheet.Range(Lat1Col & Index).value, sheet.Range(Lng1Col & Index), sheet.Range(Lat2Col & Index), sheet.Range(Lng2Col & Index)) * 1000
+            If (sheet.Range(DisCol & Index).value > 500) Then
+                sheet.Range(DisCol & Index).Interior.Color = RGB(255, 255, 0)
+            End If
+            If (sheet.Range(DisCol & Index).value > 1000) Then
+                sheet.Range(DisCol & Index).Interior.Color = RGB(255, 0, 0)
+            End If
+        End If
+    Next Index
+End Sub
+
+Sub DuplicateGroupColor(Col)
+    sheet.Range("A" & startRow & ":" & "S" & startRow).Interior.Color = RGB(203, 242, 232)
+    For Index = startRow + 1 To endRow
+        If sheet.Range(Col & Index).value = sheet.Range(Col & Index - 1).value Then
+            sheet.Range("A" & Index & ":" & "S" & Index).Interior.Color = sheet.Range("A" & Index - 1 & ":" & "S" & Index - 1).Interior.Color
+        Else
+            If (colorInter Mod 2 = 0) Then
+                sheet.Range("A" & Index & ":" & "S" & Index).Interior.Color = RGB(203, 242, 232)
+                colorInter = colorInter + 1
+            Else
+                sheet.Range("A" & Index & ":" & "S" & Index).Interior.Color = RGB(245, 211, 236)
+                colorInter = colorInter + 1
+            End If
+            
+        End If
+    Next Index
+        
+End Sub
+
+
+
+Sub MarkDistance(Index, Lat1, Lng1, Lat2, Lng2)
+    Distance = GetDistance(Lat1, Lng1, Lat2, Lng2)
+    If Distance * 1000 > 200 Then
+        sheet.Range(DistanceCol & Index).Interior.Color = RGB(255, 0, 0)
+    End If
+    sheet.Range(DistanceCol & Index).value = GetDistance(Lat1, Lng1, Lat2, Lng2) * 1000
+End Sub
+
 
 Sub MarkLatLng(Col, Index, Value1, Value2)
     sheet.Range(Col & Index).value = Abs(Value1 - Value2)
@@ -294,6 +471,14 @@ Sub FlagBelowSQL(Col)
     For Index = startRow To endRow - 1
         If sheet.Range(Col & Index).value <> "" And sheet.Range(Col & Index) <> "flag" And sheet.Range(Col & Index + 1).value = "" Then
             sheet.Range(Col & Index + 1).value = "flag"
+        End If
+    Next Index
+End Sub
+
+Sub NullBelowDistance(Col)
+    For Index = startRow To endRow - 1
+        If sheet.Range(Col & Index).value <> "" And sheet.Range(Col & Index).value <> "NULL" And sheet.Range(Col & Index + 1).value = "" Then
+            sheet.Range(Col & Index + 1).value = "NULL"
         End If
     Next Index
 End Sub
